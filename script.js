@@ -124,14 +124,7 @@ function setupEventListeners() {
     };
   }
 
-  // Category buttons
-  const categoryButtons = document.querySelectorAll('.category-button');
-  categoryButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const category = button.getAttribute('data-target') || button.textContent.trim();
-      loadProductsByCategory(category);
-    });
-  });
+  // Removed dynamic category loading so the a tags navigate to category.html natively
 }
 
 // LOGIN form submit
