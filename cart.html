@@ -1,0 +1,788 @@
+<!-- cart.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KrushakFarm - Your Cart</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    
+    .main-content {
+      margin-top: 80px; /* Space below navbar */
+      padding: 2rem;
+    }
+    
+    h1 {
+      color: #2d7a2d;
+      text-align: center;
+    }
+    .cart-container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding: 1rem 0;
+    }
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-right: 1rem;
+    }
+    .item-info {
+      flex-grow: 1;
+    }
+    .item-info h4 {
+      margin: 0 0 0.3rem;
+      color: #333;
+    }
+    .item-info p {
+      margin: 0.2rem 0;
+      color: #555;
+    }
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+    .quantity-btn {
+      background-color: #2d7a2d;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .quantity-btn:hover {
+      background-color: #246b24;
+    }
+    .quantity-display {
+      min-width: 40px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .remove-btn {
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    .remove-btn:hover {
+      background-color: #c0392b;
+    }
+    .total {
+      text-align: right;
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #2d7a2d;
+    }
+    .empty-cart {
+      text-align: center;
+      color: #777;
+      font-size: 1.1rem;
+      padding: 2rem 0;
+    }
+    .payment-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .payment-buttons button {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .upi-btn {
+      background-color: #4a90e2;
+      color: white;
+    }
+    .cod-btn {
+      background-color: #27ae60;
+      color: white;
+    }
+    .login-prompt {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+    .login-btn {
+      margin-left: 39%;
+      background-color: #2d7a2d;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 2rem;
+      margin-right: 49%;
+    }
+
+    /* QR Modal Styles */
+    .qr-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-modal-content {
+      background: white;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      border-radius: 12px;
+      text-align: center;
+      animation: slideUp 0.4s ease-out;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .qr-modal-content h2 {
+      margin-bottom: 0.5rem;
+      color: #2d7a2d;
+    }
+    .qr-modal-content p {
+      color: #444;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .qr-code-box {
+      margin: 1.5rem 0;
+    }
+    .close-btn {
+      background-color: #e74c3c;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    
+    .payment-confirm-btn {
+      background-color: #2d7a2d;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0 0.5rem;
+    }
+
+    /* Order Success Modal */
+    .success-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1001;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .success-modal-content {
+      background: white;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      border-radius: 12px;
+      text-align: center;
+      animation: slideUp 0.4s ease-out;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    .success-icon {
+      font-size: 4rem;
+      color: #2d7a2d;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo">KrushakFarm</div>
+    <div class="nav-links">
+      <a href="seller-login.html" class="nav-button">Farmers Dashboard</a>
+      <a href="index.html">Home</a>
+      <a href="search.html">All Products</a>
+      
+      <!-- User Actions -->
+      <div class="user-actions">
+        <a class="cart-btn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <p>Cart</p>
+          <span class="cart-count" id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <h1>Your Shopping Cart</h1>
+    <div class="cart-container" id="cart-container">
+      <!-- Cart items will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <!-- QR Payment Modal -->
+  <div class="qr-modal" id="qr-modal">
+    <div class="qr-modal-content">
+      <h2>Pay via UPI</h2>
+      <p>Scan the QR code below to complete your payment securely</p>
+      <div class="qr-code-box" id="qrcode" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+      <strong><p id="qr-amount"></p></strong>
+      <div style="margin-top: 1rem;">
+        <button class="payment-confirm-btn" onclick="confirmUPIPayment()">Payment Completed</button>
+        <button class="close-btn" onclick="closeQRModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Success Modal -->
+  <div class="success-modal" id="success-modal">
+    <div class="success-modal-content">
+      <div class="success-icon">✅</div>
+      <h2>Order Placed Successfully!</h2>
+      <div id="order-details"></div>
+      <div style="margin-top: 2rem;">
+        <button class="payment-confirm-btn" onclick="goToOrders()">View My Orders</button>
+        <button class="close-btn" onclick="closeSuccessModal()">Continue Shopping</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Message -->
+  <div id="popupMessage" class="popup-message" aria-live="polite">
+    <span id="popupText"></span>
+  </div>
+
+  <script>
+    const API_URL = window.location.port === '5500' ? 'http://localhost:5000/api' : '/api';
+    const cartContainer = document.getElementById('cart-container');
+    let authToken = localStorage.getItem('authToken');
+    let currentUser = null;
+    let pendingOrderData = null; // Store order data for UPI confirmation
+
+    // Initialize cart page
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuthAndLoadCart();
+    });
+
+    async function checkAuthAndLoadCart() {
+      authToken = localStorage.getItem('authToken');
+      
+      if (!authToken) {
+        showLoginPrompt();
+        return;
+      }
+
+      try {
+        // Verify auth token is still valid
+        const authRes = await fetch(`${API_URL}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (authRes.ok) {
+          const userData = await authRes.json();
+          if (userData.success && userData.user.role === 'customer') {
+            currentUser = userData.user;
+            updateNavigation();
+            await loadCart();
+          } else {
+            showLoginPrompt();
+          }
+        } else if (authRes.status === 401) {
+          localStorage.removeItem('authToken');
+          authToken = null;
+          showLoginPrompt();
+        } else {
+          showError("Authentication failed. Please try again.");
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        showError("Connection error. Please check your internet.");
+      }
+    }
+
+    function showLoginPrompt() {
+      cartContainer.innerHTML = `
+        <div class="login-prompt">
+          <h3>Please Login to View Your Cart</h3>
+          <p>You need to be logged in to manage your shopping cart.</p>
+          <button class="login-btn" onclick="redirectToLogin()">Login</button>
+        </div>
+      `;
+    }
+
+    function showError(message) {
+      cartContainer.innerHTML = `
+        <div class="login-prompt">
+          <h3>Error</h3>
+          <p>${message}</p>
+          <button class="login-btn" onclick="location.reload()">Try Again</button>
+        </div>
+      `;
+    }
+
+    function redirectToLogin() {
+      window.location.href = 'index.html';
+    }
+
+    async function loadCart() {
+      try {
+        const res = await fetch(`${API_URL}/cart`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            showLoginPrompt();
+            return;
+          }
+          throw new Error(`Failed to load cart: ${res.status}`);
+        }
+
+        const cartItems = await res.json();
+        console.log('Loaded cart items:', cartItems); // Debug log
+        
+        renderCart(cartItems);
+        updateCartCount(cartItems);
+
+      } catch (error) {
+        console.error('Error loading cart:', error);
+        
+        // Show error but don't clear existing cart display
+        const existingContent = cartContainer.innerHTML;
+        if (!existingContent || existingContent.includes('Loading')) {
+          showError('Failed to load cart. Please try again.');
+        } else {
+          // Show a small error message but keep existing content
+          showPopupMessage('Failed to refresh cart. Please reload the page if needed.', 'error');
+        }
+      }
+    }
+
+    // Validate cart item has required properties
+    function isValidCartItem(item) {
+      if (!item || typeof item !== 'object') return false;
+      
+      const hasValidId = item.productId || item._id || item.id;
+      const hasValidName = item.name || item.productName;
+      const hasValidPrice = typeof item.price === 'number' && item.price >= 0;
+      const hasValidQuantity = typeof item.quantity === 'number' && item.quantity > 0;
+      
+      return hasValidId && hasValidName && hasValidPrice && hasValidQuantity;
+    }
+
+    function renderCart(cartItems) {
+      if (!cartItems || cartItems.length === 0) {
+        cartContainer.innerHTML = `
+          <div class="empty-cart">
+            <p>Your cart is empty.</p>
+            <button class="login-btn" onclick="window.location.href='index.html'">Continue Shopping</button>
+          </div>
+        `;
+        return;
+      }
+
+      // Filter out invalid items and warn about them
+      const validItems = cartItems.filter(item => {
+        if (!isValidCartItem(item)) {
+          console.warn('Invalid cart item found:', item);
+          return false;
+        }
+        return true;
+      });
+
+      if (validItems.length === 0) {
+        cartContainer.innerHTML = `
+          <div class="empty-cart">
+            <p>Your cart has invalid items. Please refresh the page.</p>
+            <button class="login-btn" onclick="location.reload()">Refresh Page</button>
+          </div>
+        `;
+        return;
+      }
+
+      let totalPrice = 0;
+      let cartHTML = '';
+
+      validItems.forEach(item => {
+        // Use safe property access with fallbacks
+        const productId = item.productId || item._id || item.id;
+        const itemName = item.name || item.productName || 'Product';
+        const itemPrice = Number(item.price) || 0;
+        const itemQuantity = Number(item.quantity) || 1;
+        const itemUnit = item.unit || 'unit';
+        const itemImage = item.image || 'images/placeholder.png';
+        
+        const itemTotal = itemPrice * itemQuantity;
+        totalPrice += itemTotal;
+
+        cartHTML += `
+          <div class="cart-item" data-product-id="${productId}">
+            <img src="${itemImage}" alt="${itemName}" onerror="this.src='images/placeholder.png'" />
+            <div class="item-info">
+              <h4>${itemName}</h4>
+              <p>Price: ₹${itemPrice.toFixed(2)} per ${itemUnit}</p>
+              <div class="quantity-controls">
+                <button class="quantity-btn" onclick="updateQuantity('${productId}', ${itemQuantity - 1})">-</button>
+                <span class="quantity-display">${itemQuantity}</span>
+                <button class="quantity-btn" onclick="updateQuantity('${productId}', ${itemQuantity + 1})">+</button>
+              </div>
+              <p>Subtotal: ₹${itemTotal.toFixed(2)}</p>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart('${productId}')">Remove</button>
+          </div>
+        `;
+      });
+
+      cartHTML += `
+        <div class="total">
+          Total Price: ₹${totalPrice.toFixed(2)}
+        </div>
+        <div class="payment-buttons">
+          <button class="upi-btn" onclick="openQRModal(${totalPrice})">Pay via UPI QR</button>
+          <button class="cod-btn" onclick="placeOrder('cod', ${totalPrice})">Cash on Delivery</button>
+        </div>
+      `;
+
+      cartContainer.innerHTML = cartHTML;
+    }
+
+    async function updateQuantity(productId, newQuantity) {
+      if (newQuantity <= 0) {
+        removeFromCart(productId);
+        return;
+      }
+
+      try {
+        showPopupMessage("Updating quantity...");
+        
+        // Remove the item first
+        await fetch(`${API_URL}/cart/${productId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        // Add it back with new quantity
+        for (let i = 0; i < newQuantity; i++) {
+          await fetch(`${API_URL}/cart/add`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ productId })
+          });
+        }
+
+        loadCart(); // Refresh cart display
+        showPopupMessage("Quantity updated!");
+      } catch (error) {
+        console.error('Error updating quantity:', error);
+        showPopupMessage('Error updating quantity. Please try again.', 'error');
+      }
+    }
+
+    async function removeFromCart(productId) {
+      try {
+        const res = await fetch(`${API_URL}/cart/${productId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (res.ok) {
+          loadCart(); // Refresh cart
+          showPopupMessage("Item removed from cart!");
+        } else {
+          throw new Error('Failed to remove item');
+        }
+      } catch (error) {
+        console.error('Error removing from cart:', error);
+        showPopupMessage('Error removing item. Please try again.', 'error');
+      }
+    }
+
+    async function placeOrder(paymentMethod, totalAmount) {
+      try {
+        showPopupMessage("Placing your order...");
+        
+        // First get current cart items to include in order
+        const cartRes = await fetch(`${API_URL}/cart`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (!cartRes.ok) {
+          throw new Error('Failed to get cart items');
+        }
+        
+        const cartItems = await cartRes.json();
+        console.log('Cart items before order:', cartItems); // Debug log
+        
+        if (!cartItems || cartItems.length === 0) {
+          showPopupMessage('Your cart is empty!', 'error');
+          return;
+        }
+
+        // Validate cart items have required properties
+        const validItems = cartItems.filter(item => {
+          const hasId = item.productId || item._id || item.id;
+          const hasName = item.name || item.productName;
+          const hasPrice = item.price !== undefined && item.price !== null;
+          
+          if (!hasId || !hasName || !hasPrice) {
+            console.warn('Invalid cart item:', item);
+            return false;
+          }
+          return true;
+        });
+
+        if (validItems.length === 0) {
+          showPopupMessage('Cart items are invalid. Please refresh and try again.', 'error');
+          loadCart(); // Refresh cart
+          return;
+        }
+
+        // Prepare order data with cart items - safely handle missing properties
+        const orderData = {
+          paymentMethod,
+          totalAmount: totalAmount,
+          paymentStatus: paymentMethod === 'cod' ? 'pending' : 'completed',
+          items: validItems.map(item => ({
+            productId: item.productId || item._id || item.id,
+            productName: item.name || item.productName || 'Product',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+            unit: item.unit || 'unit'
+          }))
+        };
+
+        console.log('Order data being sent:', orderData); // Debug log
+        
+        const res = await fetch(`${API_URL}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify(orderData)
+        });
+
+        const data = await res.json();
+        console.log('Order response:', data); // Debug log
+
+        if (res.ok && data.success) {
+          // Show success modal with order details
+          showOrderSuccess({
+            orderId: data.order?._id || data.orderId || Date.now(),
+            totalAmount: data.order?.totalAmount || data.totalAmount || totalAmount,
+            paymentMethod: paymentMethod.toUpperCase(),
+            itemCount: validItems.length,
+            items: validItems
+          });
+          
+          // Refresh cart after a delay (should be empty now)
+          setTimeout(() => {
+            loadCart();
+          }, 1500);
+        } else {
+          if (res.status === 401) {
+            showPopupMessage('Session expired. Please login again.', 'error');
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 2000);
+          } else {
+            throw new Error(data.message || `Server error: ${res.status}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error placing order:', error);
+        showPopupMessage('Error placing order: ' + error.message, 'error');
+        
+        // Don't reload cart on error - keep items intact
+        // Only reload if it's a specific cart corruption issue
+        if (error.message.includes('cart items are invalid')) {
+          setTimeout(() => {
+            loadCart();
+          }, 2000);
+        }
+      }
+    }
+
+    function openQRModal(amount) {
+      const modal = document.getElementById('qr-modal');
+      const qrContainer = document.getElementById('qrcode');
+      const qrAmount = document.getElementById('qr-amount');
+
+      const upiId = "8106625257@airtel";
+      const name = "V Manohar";
+      const note = "Payment for KrushakFarm Order";
+
+      const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+      qrContainer.innerHTML = ''; // Clear old QR code
+      new QRCode(qrContainer, {
+        text: upiLink,
+        width: 200,
+        height: 200
+      });
+
+      qrAmount.innerText = `Amount: ₹${amount.toFixed(2)}`;
+      
+      // Store pending order data
+      pendingOrderData = {
+        paymentMethod: 'upi',
+        totalAmount: amount
+      };
+      
+      modal.style.display = 'flex';
+    }
+
+    function closeQRModal() {
+      document.getElementById('qr-modal').style.display = 'none';
+      pendingOrderData = null;
+    }
+
+    // Confirm UPI payment and place order
+    async function confirmUPIPayment() {
+      if (!pendingOrderData) {
+        showPopupMessage('No pending payment found.', 'error');
+        return;
+      }
+
+      closeQRModal();
+      await placeOrder(pendingOrderData.paymentMethod, pendingOrderData.totalAmount);
+      pendingOrderData = null;
+    }
+
+    function showOrderSuccess(orderData) {
+      const modal = document.getElementById('success-modal');
+      const orderDetails = document.getElementById('order-details');
+      
+      orderDetails.innerHTML = `
+        <p><strong>Order ID:</strong> #${orderData.orderId.slice(-8)}</p>
+        <p><strong>Total Amount:</strong> ₹${orderData.totalAmount.toFixed(2)}</p>
+        <p><strong>Payment Method:</strong> ${orderData.paymentMethod}</p>
+        <p><strong>Items:</strong> ${orderData.itemCount} item${orderData.itemCount !== 1 ? 's' : ''}</p>
+        <p style="color: #2d7a2d; margin-top: 1rem;">Your order will be processed soon!</p>
+      `;
+      
+      modal.style.display = 'flex';
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('success-modal').style.display = 'none';
+      window.location.href = 'index.html';
+    }
+
+    function goToOrders() {
+      document.getElementById('success-modal').style.display = 'none';
+      // Set a flag to refresh orders when the page loads
+      localStorage.setItem('refreshOrders', 'true');
+      window.location.href = 'my-orders.html';
+    }
+
+    // Navigation functions
+    function updateNavigation() {
+      if (currentUser) {
+        const loginBtn = document.getElementById("loginBtn");
+        const profileMenu = document.getElementById("profileMenu");
+        
+        if (loginBtn) loginBtn.classList.add("hidden");
+        if (profileMenu) profileMenu.classList.remove("hidden");
+      }
+    }
+
+    function updateCartCount(cartItems = null) {
+      const cartCountEl = document.getElementById("cart-count");
+      if (!cartCountEl) return;
+
+      if (cartItems) {
+        const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        cartCountEl.textContent = String(totalItems);
+      } else {
+        cartCountEl.textContent = "0";
+      }
+    }
+
+    async function logoutUser() {
+      try {
+        if (authToken) {
+          await fetch(`${API_URL}/auth/logout`, { 
+            method: "POST",
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+        }
+      } catch (e) {
+        console.error("Logout error:", e);
+      }
+      
+      localStorage.removeItem('authToken');
+      authToken = null;
+      currentUser = null;
+      window.location.href = 'index.html';
+    }
+
+    // Show popup message
+    function showPopupMessage(message, type = 'success') {
+      const popup = document.getElementById("popupMessage");
+      const text = document.getElementById("popupText");
+      if (!popup || !text) return;
+
+      text.textContent = message;
+      
+      // Set background color based on type
+      if (type === 'error') {
+        popup.style.backgroundColor = '#f44336';
+      } else if (type === 'warning') {
+        popup.style.backgroundColor = '#ff9800';
+      } else {
+        popup.style.backgroundColor = '#4BB543';
+      }
+      
+      popup.classList.add("visible");
+
+      setTimeout(() => {
+        popup.classList.remove("visible");
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

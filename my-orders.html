@@ -1,0 +1,840 @@
+<!-- my-orders.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Orders - KrushakFarm</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    /* Orders page specific styles */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .orders-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      margin-top: 100px; /* Space below navbar */
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem 0;
+      background: linear-gradient(135deg, #2d7a2d, #4caf50);
+      color: white;
+      border-radius: 12px;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+    }
+
+    .back-nav {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      background: #f8f9fa;
+      color: #2d7a2d;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .back-nav:hover {
+      background: #2d7a2d;
+      color: white;
+    }
+
+    .order-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      border-left: 4px solid #2d7a2d;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .order-id {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .order-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d4edda; color: #155724; }
+    .status-delivered { background: #d1ecf1; color: #0c5460; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+
+    .order-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .meta-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .meta-value {
+      color: #333;
+    }
+
+    .order-items {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .order-items h4 {
+      margin: 0 0 0.75rem 0;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    .item-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .item-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .item-list li:last-child {
+      border-bottom: none;
+    }
+
+    .item-name {
+      font-weight: 500;
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: #2d7a2d;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    .no-orders {
+      text-align: center;
+      padding: 3rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      color: #666;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      text-align: center;
+    }
+
+    .session-expired {
+      background: #fff3cd;
+      color: #856404;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #2d7a2d;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: #1e5a1e;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .order-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .page-header h1 {
+        font-size: 2rem;
+      }
+      
+      .orders-container {
+        margin-top: 80px;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo">KrushakFarm</div>
+    <div class="nav-links">
+      <a href="seller-login.html" class="nav-button">Farmers Dashboard</a>
+      <a href="index.html">Home</a>
+      <a href="search.html">All Products</a>
+      
+      <!-- User Actions -->
+      <div class="user-actions">
+        <a class="cart-btn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <p>Cart</p>
+          <span class="cart-count" id="cart-count">0</span>
+        </a>
+        
+        <div class="profile-menu" id="profileMenu">
+          <img src="images/profile.png" alt="Profile Icon" class="profile-icon" />
+          <div class="dropdown hidden" id="dropdownMenu">
+            <a href="my-orders.html">My Orders</a>
+            <a href="#" onclick="logoutUser()">Logout</a>
+          </div>
+        </div>
+
+        <button type="button" class="login-btn hidden" id="loginBtn">Login</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="orders-container">
+    <a href="index.html" class="back-nav">← Back to Home</a>
+    
+    <div class="page-header">
+      <h1>My Orders</h1>
+      <p>Track all your fresh produce orders</p>
+      <button onclick="refreshOrders()" class="btn" style="margin-top: 1rem; background: rgba(255,255,255,0.2); border: 2px solid white;">
+        🔄 Refresh Orders
+      </button>
+    </div>
+
+    <div id="ordersContainer" class="loading">
+      <div>Loading your orders...</div>
+    </div>
+  </main>
+
+  <!-- Popup Message -->
+  <div id="popupMessage" class="popup-message" aria-live="polite">
+    <span id="popupText"></span>
+  </div>
+
+  <script>
+    // API configuration
+    const API_URL = window.location.port === '5500' ? 'http://localhost:5000/api' : '/api';
+    let currentUser = null;
+    let authToken = null;
+
+    // Initialize page
+    window.addEventListener("DOMContentLoaded", () => {
+      checkAuthAndLoadOrders();
+      
+      // Auto-refresh orders every 30 seconds if page is visible
+      setInterval(() => {
+        if (!document.hidden && authToken && currentUser) {
+          loadOrders();
+        }
+      }, 30000);
+    });
+
+    // Refresh orders when page becomes visible (user returns from cart)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && authToken && currentUser) {
+        setTimeout(() => {
+          loadOrders();
+        }, 1000); // Small delay to ensure any pending operations complete
+      }
+    });
+
+    // Check authentication and load orders
+    async function checkAuthAndLoadOrders() {
+      authToken = localStorage.getItem("authToken");
+      
+      if (!authToken) {
+        showNotLoggedIn();
+        return;
+      }
+
+      // Manual refresh function
+      async function refreshOrders() {
+        const ordersContainer = document.getElementById("ordersContainer");
+        const originalContent = ordersContainer.innerHTML;
+        
+        ordersContainer.innerHTML = `
+          <div class="loading">
+            <div>Refreshing orders...</div>
+          </div>
+        `;
+        
+        try {
+          await loadOrders();
+          showPopupMessage("Orders refreshed!");
+        } catch (error) {
+          ordersContainer.innerHTML = originalContent;
+          showPopupMessage("Failed to refresh orders. Please try again.", "error");
+        }
+      }
+
+      // Verify token is still valid
+      try {
+        const authRes = await fetch(`${API_URL}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (authRes.ok) {
+          const userData = await authRes.json();
+          if (userData.success && userData.user && userData.user.role === 'customer') {
+            currentUser = userData.user;
+            updateNavigation();
+            
+            // Check if we need to refresh orders (coming from cart after order placement)
+            const shouldRefresh = localStorage.getItem('refreshOrders');
+            if (shouldRefresh) {
+              localStorage.removeItem('refreshOrders');
+              showPopupMessage("Loading your latest orders...");
+              // Add a small delay to ensure order is processed on server
+              setTimeout(async () => {
+                await loadOrders();
+              }, 2000);
+            } else {
+              await loadOrders();
+            }
+          } else {
+            console.error('Invalid user data:', userData);
+            showNotLoggedIn();
+          }
+        } else if (authRes.status === 401) {
+          showSessionExpired();
+        } else {
+          showError("Authentication check failed. Please try again.");
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        showError("Network error. Please check your connection.");
+      }
+    }
+
+    // Load orders from API with better error handling and fallback
+    async function loadOrders() {
+      try {
+        // First try the primary orders endpoint
+        let res = await fetch(`${API_URL}/orders`, {
+          headers: { 
+            'Authorization': `Bearer ${authToken}`,
+            'Cache-Control': 'no-cache'
+          }
+        });
+
+        // If 404, try alternative endpoints
+        if (res.status === 404) {
+          console.log('Primary orders endpoint not found, trying alternatives...');
+          
+          // Try different possible endpoints
+          const alternativeEndpoints = [
+            `${API_URL}/order`,
+            `${API_URL}/user/orders`,
+            `${API_URL}/customer/orders`
+          ];
+          
+          for (const endpoint of alternativeEndpoints) {
+            try {
+              res = await fetch(endpoint, {
+                headers: { 
+                  'Authorization': `Bearer ${authToken}`,
+                  'Cache-Control': 'no-cache'
+                }
+              });
+              
+              if (res.ok) {
+                console.log(`Found working endpoint: ${endpoint}`);
+                break;
+              }
+            } catch (endpointError) {
+              console.log(`Failed endpoint ${endpoint}:`, endpointError.message);
+              continue;
+            }
+          }
+        }
+
+        if (res.status === 401) {
+          showSessionExpired();
+          return;
+        }
+
+        if (!res.ok) {
+          // Show detailed error information
+          const errorText = await res.text();
+          console.error('Server response:', {
+            status: res.status,
+            statusText: res.statusText,
+            body: errorText
+          });
+          
+          throw new Error(`Server error: ${res.status} - ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        console.log('Orders data received:', data);
+
+        // Handle different response formats
+        let orders = [];
+        if (data.success && data.orders && Array.isArray(data.orders)) {
+          orders = data.orders;
+        } else if (data.orders && Array.isArray(data.orders)) {
+          orders = data.orders;
+        } else if (Array.isArray(data)) {
+          orders = data;
+        } else if (data.data && Array.isArray(data.data)) {
+          orders = data.data;
+        }
+
+        if (orders.length > 0) {
+          displayOrders(orders);
+        } else {
+          showNoOrders();
+        }
+
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        
+        // Show detailed error with debugging info
+        showDetailedError(error.message);
+      }
+    }
+
+    // Show detailed error with debugging information
+    function showDetailedError(message) {
+      document.getElementById("ordersContainer").innerHTML = `
+        <div class="error-message">
+          <h3>⚠️ Error Loading Orders</h3>
+          <p><strong>Error:</strong> ${message}</p>
+          <div style="margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-family: monospace; font-size: 0.9rem;">
+            <strong>Debug Information:</strong><br>
+            API URL: ${API_URL}<br>
+            Endpoint: ${API_URL}/orders<br>
+            Auth Token: ${authToken ? 'Present' : 'Missing'}<br>
+            User: ${currentUser ? currentUser.name : 'Not logged in'}
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="refreshOrders()" class="btn">Try Again</button>
+            <button onclick="testConnection()" class="btn" style="background: #17a2b8;">Test Connection</button>
+            <button onclick="showServerInfo()" class="btn" style="background: #6c757d;">Server Info</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Test server connection
+    async function testConnection() {
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = `<div class="loading"><div>Testing server connection...</div></div>`;
+      
+      try {
+        // Test basic API connection
+        const testRes = await fetch(`${API_URL}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        const connectionStatus = testRes.ok ? 'Connected' : `Failed (${testRes.status})`;
+        
+        // Try to get available endpoints
+        let availableEndpoints = [];
+        const endpointsToTest = [
+          '/orders',
+          '/order', 
+          '/user/orders',
+          '/customer/orders',
+          '/products',
+          '/cart'
+        ];
+        
+        for (const endpoint of endpointsToTest) {
+          try {
+            const endpointRes = await fetch(`${API_URL}${endpoint}`, {
+              headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            
+            availableEndpoints.push({
+              endpoint,
+              status: endpointRes.status,
+              available: endpointRes.status !== 404
+            });
+          } catch (e) {
+            availableEndpoints.push({
+              endpoint,
+              status: 'Error',
+              available: false
+            });
+          }
+        }
+        
+        container.innerHTML = `
+          <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <h3>🔍 Connection Test Results</h3>
+            <p><strong>API Connection:</strong> ${connectionStatus}</p>
+            <h4>Available Endpoints:</h4>
+            <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
+              ${availableEndpoints.map(ep => `
+                <li style="margin: 0.5rem 0; color: ${ep.available ? 'green' : 'red'};">
+                  ${API_URL}${ep.endpoint} - ${ep.status} ${ep.available ? '✓' : '✗'}
+                </li>
+              `).join('')}
+            </ul>
+            <div style="margin-top: 2rem;">
+              <button onclick="loadOrders()" class="btn">Back to Orders</button>
+            </div>
+          </div>
+        `;
+        
+      } catch (error) {
+        container.innerHTML = `
+          <div class="error-message">
+            <h3>❌ Connection Failed</h3>
+            <p>Cannot connect to server: ${error.message}</p>
+            <p>Please check if your server is running on ${API_URL}</p>
+            <button onclick="loadOrders()" class="btn">Back</button>
+          </div>
+        `;
+      }
+    }
+
+    // Show server information
+    function showServerInfo() {
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = `
+        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <h3>🔧 Server Configuration</h3>
+          <div style="text-align: left; max-width: 600px; margin: 0 auto; font-family: monospace; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+            <p><strong>Expected Server Setup:</strong></p>
+            <ul>
+              <li>Server should be running and accessible</li>
+              <li>Orders endpoint: <code>GET /api/orders</code></li>
+              <li>Should return: <code>{ success: true, orders: [...] }</code></li>
+              <li>Requires: Authorization header with Bearer token</li>
+            </ul>
+            <p><strong>Current Configuration:</strong></p>
+            <ul>
+              <li>API URL: <code>${API_URL}</code></li>
+              <li>Auth Token: ${authToken ? 'Present (length: ' + authToken.length + ')' : 'Missing'}</li>
+              <li>User: ${currentUser ? currentUser.name + ' (' + currentUser.email + ')' : 'Not authenticated'}</li>
+            </ul>
+          </div>
+          <div style="margin-top: 2rem;">
+            <button onclick="loadOrders()" class="btn">Back to Orders</button>
+            <button onclick="checkOrdersDirectly()" class="btn" style="background: #6610f2;">Check Orders Directly</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Check orders with different methods
+    async function checkOrdersDirectly() {
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = `<div class="loading"><div>Checking orders directly...</div></div>`;
+      
+      // Try to create a test order first if none exist
+      try {
+        const createRes = await fetch(`${API_URL}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            items: [{ productName: 'Test Product', quantity: 1, price: 10 }],
+            totalAmount: 10,
+            paymentMethod: 'test',
+            paymentStatus: 'completed'
+          })
+        });
+        
+        if (createRes.ok) {
+          showPopupMessage("Test order created successfully!");
+          setTimeout(() => loadOrders(), 1000);
+        } else {
+          const errorData = await createRes.text();
+          showPopupMessage(`Failed to create test order: ${createRes.status}`, 'error');
+          console.error('Create order error:', errorData);
+        }
+        
+      } catch (error) {
+        showPopupMessage(`Error creating test order: ${error.message}`, 'error');
+        loadOrders();
+      }
+    }
+
+    // Display orders with safe property access
+    function displayOrders(orders) {
+      let html = '';
+      
+      orders.forEach((order, index) => {
+        try {
+          // Safely extract order data with fallbacks
+          const orderId = order._id || order.id || `order-${index + 1}`;
+          const status = order.status || 'pending';
+          const totalAmount = order.totalAmount || order.total || 0;
+          const paymentMethod = order.paymentMethod || 'N/A';
+          const createdAt = order.createdAt || order.date || new Date();
+          const items = order.items || [];
+          
+          // Format date safely
+          let orderDate = 'Date not available';
+          try {
+            orderDate = new Date(createdAt).toLocaleDateString('en-IN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+          } catch (dateError) {
+            console.warn('Date parsing error:', dateError);
+          }
+
+          html += `
+            <div class="order-card">
+              <div class="order-header">
+                <div class="order-id">Order #${orderId.toString().slice(-8)}</div>
+                <div class="order-status status-${status.toLowerCase()}">${status}</div>
+              </div>
+              
+              <div class="order-meta">
+                <div class="meta-item">
+                  <span class="meta-label">📅 Date:</span>
+                  <span class="meta-value">${orderDate}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">💰 Total:</span>
+                  <span class="meta-value">₹${Number(totalAmount).toFixed(2)}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">💳 Payment:</span>
+                  <span class="meta-value">${paymentMethod.toUpperCase()}</span>
+                </div>
+                ${order.deliveryAddress ? `
+                  <div class="meta-item">
+                    <span class="meta-label">📍 Delivery:</span>
+                    <span class="meta-value">${order.deliveryAddress}</span>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="order-items">
+                <h4>📦 Items (${items.length})</h4>
+                ${items.length > 0 ? `
+                  <ul class="item-list">
+                    ${items.map(item => {
+                      // Safely extract item data
+                      const productName = item.productName || item.name || 'Product';
+                      const quantity = item.quantity || 1;
+                      const price = item.price || 0;
+                      const itemTotal = Number(price) * Number(quantity);
+                      
+                      return `
+                        <li>
+                          <div>
+                            <span class="item-name">${productName}</span>
+                            <div style="font-size: 0.9rem; color: #666;">Quantity: ${quantity}</div>
+                          </div>
+                          <div class="item-price">₹${itemTotal.toFixed(2)}</div>
+                        </li>
+                      `;
+                    }).join('')}
+                  </ul>
+                ` : `
+                  <p style="color: #666; text-align: center;">No items found for this order</p>
+                `}
+              </div>
+            </div>
+          `;
+        } catch (orderError) {
+          console.error('Error processing order:', orderError, order);
+          // Still show a basic order card even if there's an error
+          html += `
+            <div class="order-card">
+              <div class="order-header">
+                <div class="order-id">Order #${index + 1}</div>
+                <div class="order-status status-pending">Error Loading</div>
+              </div>
+              <p style="color: #666;">There was an error loading this order details.</p>
+            </div>
+          `;
+        }
+      });
+
+      document.getElementById("ordersContainer").innerHTML = html;
+    }
+
+    // Show various states
+    function showNotLoggedIn() {
+      document.getElementById("ordersContainer").innerHTML = `
+        <div class="session-expired">
+          <h3>🔐 Please Login</h3>
+          <p>You need to be logged in to view your orders.</p>
+          <a href="index.html" class="btn">Go to Home & Login</a>
+        </div>
+      `;
+    }
+
+    function showSessionExpired() {
+      localStorage.removeItem('authToken');
+      document.getElementById("ordersContainer").innerHTML = `
+        <div class="session-expired">
+          <h3>⏰ Session Expired</h3>
+          <p>Your login session has expired. Please login again to view your orders.</p>
+          <a href="index.html" class="btn">Return to Home</a>
+        </div>
+      `;
+    }
+
+    function showNoOrders() {
+      document.getElementById("ordersContainer").innerHTML = `
+        <div class="no-orders">
+          <h3>📦 No Orders Yet</h3>
+          <p>You haven't placed any orders yet. Start shopping for fresh produce!</p>
+          <a href="index.html" class="btn">Start Shopping</a>
+        </div>
+      `;
+    }
+
+    function showError(message) {
+      document.getElementById("ordersContainer").innerHTML = `
+        <div class="error-message">
+          <h3>⚠️ Error</h3>
+          <p>${message}</p>
+          <button onclick="location.reload()" class="btn">Try Again</button>
+        </div>
+      `;
+    }
+
+    // Update navigation for logged-in user
+    function updateNavigation() {
+      if (currentUser) {
+        const loginBtn = document.getElementById("loginBtn");
+        const profileMenu = document.getElementById("profileMenu");
+        
+        if (loginBtn) loginBtn.classList.add("hidden");
+        if (profileMenu) profileMenu.classList.remove("hidden");
+        
+        // Update cart count
+        updateCartCount();
+      }
+    }
+
+    // Update cart count
+    async function updateCartCount() {
+      const cartCountEl = document.getElementById("cart-count");
+      if (!authToken || !cartCountEl) return;
+
+      try {
+        const res = await fetch(`${API_URL}/cart`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (res.ok) {
+          const cartItems = await res.json();
+          const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+          cartCountEl.textContent = String(totalItems);
+        }
+      } catch (error) {
+        console.error('Cart count error:', error);
+      }
+    }
+
+    // Logout function
+    async function logoutUser() {
+      try {
+        if (authToken) {
+          await fetch(`${API_URL}/auth/logout`, { 
+            method: "POST",
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+        }
+      } catch (e) {
+        console.error("Logout error:", e);
+      }
+      
+      localStorage.removeItem('authToken');
+      authToken = null;
+      currentUser = null;
+      window.location.href = 'index.html';
+    }
+
+    // Show popup message
+    function showPopupMessage(message, type = 'success') {
+      const popup = document.getElementById("popupMessage");
+      const text = document.getElementById("popupText");
+      if (!popup || !text) return;
+
+      text.textContent = message;
+      
+      // Set background color based on type
+      if (type === 'error') {
+        popup.style.backgroundColor = '#f44336';
+      } else if (type === 'warning') {
+        popup.style.backgroundColor = '#ff9800';
+      } else {
+        popup.style.backgroundColor = '#4BB543';
+      }
+      
+      popup.classList.add("visible");
+
+      setTimeout(() => {
+        popup.classList.remove("visible");
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KrushakFarm - My Profile</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .profile-section {
+      padding: 4rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .profile-card {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-top: 5px solid #2d7a2d;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: #e5f6ef;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: #2d7a2d;
+    }
+
+    .profile-header-info h2 {
+      margin: 0 0 0.3rem 0;
+      color: #333;
+    }
+
+    .profile-header-info span {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge-customer {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .badge-farmer {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .profile-details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .detail-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-group label {
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 0.3rem;
+    }
+
+    .detail-group div {
+      font-size: 1.1rem;
+      color: #333;
+      padding: 0.8rem;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+
+    .loading-profile {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    @media (min-width: 600px) {
+      .profile-details {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">KrushakFarm</div>
+    <div class="nav-links">
+      <a href="seller-login.html" class="nav-button">Farmers Dashboard</a>
+      <a href="index.html">Home</a>
+      <a href="search.html">All Products</a>
+      <input type="text" placeholder="Search products" aria-label="Search products" />
+
+      <!-- Cart + Profile -->
+      <div class="user-actions">
+        <!-- Cart -->
+        <a class="cart-btn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <p>Cart</p>
+          <span class="cart-count" id="cart-count">0</span>
+        </a>
+
+        <!-- Profile dropdown (hidden before login) -->
+        <div class="profile-menu hidden" id="profileMenu">
+          <img src="images/profile.png" alt="Profile Icon" class="profile-icon" />
+          <div class="dropdown hidden" id="dropdownMenu">
+            <a href="#">My Profile</a>
+            <a href="my-orders.html">My Orders</a>
+            <a href="about.html">About</a>
+            <a href="#" onclick="logoutUser()">Logout</a>
+          </div>
+        </div>
+
+        <!-- Login button (before login) -->
+        <button type="button" class="login-btn" id="loginBtn">Login</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main dynamic content -->
+  <main id="main-content">
+    <section class="profile-section">
+      <div class="profile-card" id="profileContainer">
+        <div class="loading-profile">Loading profile information...</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <h3>KrushakFarm</h3>
+        <p>Connecting Farmers & Consumers directly for fresh, quality, and sustainable produce.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="search.html">All Products</a></li>
+          <li><a href="seller-login.html">Farmer Dashboard</a></li>
+        </ul>
+      </div>
+      <div class="footer-legal">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Return Policy</a></li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <h4>Contact Us</h4>
+        <p>📍 123 Farm Road, Green Valley</p>
+        <p>📞 +1 234 567 8900</p>
+        <p>✉️ support@krushakfarm.com</p>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+          <a href="#" aria-label="Instagram">📸</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 KrushakFarm. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Popup Message -->
+  <div id="popupMessage" class="popup-message" aria-live="polite">
+    <span id="popupText"></span>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = localStorage.getItem('authToken');
+      const profileContainer = document.getElementById('profileContainer');
+
+      if (!token) {
+        profileContainer.innerHTML = `
+          <div class="loading-profile">
+            <h3>Not Logged In</h3>
+            <p>Please log in to view your profile.</p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const apiBaseUrl = window.location.port === '5500' ? 'http://localhost:5000/api' : '/api';
+        const response = await fetch(`${apiBaseUrl}/auth/me`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          const user = data.user;
+          const roleBadgeClass = user.role === 'farmer' ? 'badge-farmer' : 'badge-customer';
+          const verifiedStatus = user.isEmailVerified ? 'Yes ✅' : 'No ❌';
+
+          profileContainer.innerHTML = `
+            <div class="profile-header">
+              <div class="profile-avatar">👤</div>
+              <div class="profile-header-info">
+                <h2>${user.name}</h2>
+                <span class="${roleBadgeClass}">${user.role}</span>
+              </div>
+            </div>
+            <div class="profile-details">
+              <div class="detail-group">
+                <label>Full Name</label>
+                <div>${user.name}</div>
+              </div>
+              <div class="detail-group">
+                <label>Email Address</label>
+                <div>${user.email}</div>
+              </div>
+              <div class="detail-group">
+                <label>Account Role</label>
+                <div style="text-transform: capitalize;">${user.role}</div>
+              </div>
+              <div class="detail-group">
+                <label>Email Verified</label>
+                <div>${verifiedStatus}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          throw new Error('Failed to load profile');
+        }
+      } catch (err) {
+        profileContainer.innerHTML = `
+          <div class="loading-profile" style="color: red;">
+            <h3>Error Loading Profile</h3>
+            <p>We couldn't fetch your profile information. Please try refreshing.</p>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+
+</html>
