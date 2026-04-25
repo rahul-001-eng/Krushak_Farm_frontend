@@ -1,4 +1,4 @@
-const API_URL = window.location.port === '5500' ? 'http://localhost:5000/api' : '/api';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:5000/api' : '/api';
 let currentUser = null;
 let authToken = null;
 
